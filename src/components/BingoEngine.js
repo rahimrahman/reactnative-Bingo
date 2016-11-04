@@ -16,9 +16,7 @@ const createBingoCard = (bingoCellValues, renderRow, renderColumn) => {
   return rows;
 };
 
-const bingoCellValues = () => {
-  return bingoCellValuesUS();
-};
+const bingoCellValues = () => bingoCellValuesUS();
 
 const bingoCellValuesUS = () => {
   const cellValues = [];
@@ -41,39 +39,69 @@ const bingoCellValuesUS = () => {
       // each column.
       while (columns[columnNum].length < rowNum) {
         aRandomNumber = _.random(rules[columnNum][0], rules[columnNum][1]);
-        if (columns[columnNum].indexOf(aRandomNumber) > -1) continue;
-        row.push(aRandomNumber);
-        columns[columnNum].push(aRandomNumber);
+        // if (columns[columnNum].indexOf(aRandomNumber) > -1) continue;
+        if (columns[columnNum].indexOf(aRandomNumber) === -1) {
+          row.push(aRandomNumber);
+          columns[columnNum].push(aRandomNumber);
+        }
       }
     }
     cellValues.push(row);
   }
 
+  // middle cell is a gimme
   cellValues[3][2] = 'FREE';
 
   return cellValues;
 };
 
-const usaRules = () => {
-  return [
-    [1, 15],
-    [16, 30],
-    [31, 45],
-    [46, 60],
-    [61, 75]
-  ];
+const bingoCheck = (cellValues, cellStatus, rowNum, columnNum) => {
+  const rowCount = cellValues.length;
+  // check horizontal
+  if (cellStatus[rowNum].indexOf(0) === -1) return true;
+
+  // check vertical
+  let verticalCount = 0;
+  for (let row = 1; row < rowCount; row++) {
+    if (cellStatus[row][columnNum] === 1) verticalCount++;
+  }
+  if (verticalCount === cellValues[rowNum].length) return true;
+
+  // check diagonal
+  let diagonalUpDownCounter = 0;
+  let diagonalDownUpCounter = 0;
+  let columnUpDown = 0;
+  for (let row = 1; row < rowCount; row++) {
+    if (cellStatus[row][columnUpDown] === 1) diagonalUpDownCounter++;
+    if (cellStatus[rowCount - row][columnUpDown] === 1) diagonalDownUpCounter++;
+    console.log(rowCount - row, columnUpDown, diagonalDownUpCounter);
+    columnUpDown++;
+  }
+  if ((diagonalUpDownCounter === rowCount - 1) || 
+      (diagonalDownUpCounter === rowCount - 1)) 
+    return true;
+
+  return false;
 };
 
+const usaRules = () => [
+  [1, 15],
+  [16, 30],
+  [31, 45],
+  [46, 60],
+  [61, 75]
+];
 
-const initCellStatus = () =>
+
+const bingoCellStatusInit = () =>
   [
+    [-1, -1, -1, -1, -1],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0]
   ];
 
-export { createBingoCard, bingoCellValues, initCellStatus };
+export { createBingoCard, bingoCellValues, bingoCellStatusInit, bingoCheck };
 

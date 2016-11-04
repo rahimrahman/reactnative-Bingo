@@ -1,24 +1,29 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableWithoutFeedback } from 'react-native';
-import { createBingoCard, initCellStatus, bingoCellValues } from './BingoEngine';
+import { View, Text, TouchableWithoutFeedback, Modal } from 'react-native';
+import { createBingoCard, bingoCellStatusInit, bingoCellValues, bingoCheck } from './BingoEngine';
+import { BingoCompleteModal } from './BingoCompleteModal';
 
 class BingoCard extends Component {
   constructor() {
     super();
 
     this.bingoCellValues = bingoCellValues();
-    this.cellStatus = initCellStatus();
+    this.cellStatus = bingoCellStatusInit();
     this.state = {
       rerender: 0,
+      showBingo: false,
     };
   }
 
   onCellPress(rowNum, columnNum) {
     this.cellStatus[rowNum][columnNum] = 1;
+    const isBingo = bingoCheck(this.bingoCellValues, this.cellStatus, rowNum, columnNum);
 
     let rerender = 1;
     if (this.state.rerender === 1) rerender = 0;
     this.setState({ rerender });
+
+    if (isBingo) this.setState({ showBingo: true });
   }
 
   renderRow(rowNum, columnValue) {
@@ -29,19 +34,34 @@ class BingoCard extends Component {
     );
   }
 
-  renderColumn(rowNum, columNum) {
-    const theCellValue = this.bingoCellValues[rowNum][columNum];
-    const theCellStatus = this.cellStatus[rowNum][columNum];
-    const dynamic = theCellStatus ? styles.pressed : styles.normal;
+  renderColumn(rowNum, columnNum) {
+    const cellValue = this.bingoCellValues[rowNum][columnNum];
+    const cellStatus = this.cellStatus[rowNum][columnNum];
+    const dynamic = (cellStatus === 1) ? styles.pressed : styles.normal;
+
+    if (cellStatus === -1) {
+      return (
+        <View key={cellValue} style={{ flex: 1 }}>
+          {this.renderCell(dynamic, cellValue)}
+        </View>
+      );
+    }
+
     return (
       <TouchableWithoutFeedback
-        key={theCellValue}
-        onPress={this.onCellPress.bind(this, rowNum, columNum)}
-      >
-        <View style={styles.cell}>
-          <Text style={dynamic}>{theCellValue}</Text>
-        </View>
+        key={cellValue}
+        onPress={this.onCellPress.bind(this, rowNum, columnNum)}
+        >
+        {this.renderCell(dynamic, cellValue)}
       </TouchableWithoutFeedback>
+    );
+  }
+
+  renderCell(dynamic, cellValue) {
+    return (
+      <View style={styles.cell}>
+        <Text style={dynamic}>{cellValue}</Text>
+      </View>
     );
   }
 
@@ -54,7 +74,10 @@ class BingoCard extends Component {
 
     return (
       <View style={styles.bingoContainer}>
-        {bingoCardLayout}
+        <View style={{ flex: 1 }}>
+          {bingoCardLayout}
+        </View>
+        <BingoCompleteModal visible={this.state.showBingo} />
       </View>
     );
   }
@@ -84,7 +107,7 @@ const styles = {
     justifyContent: 'space-around',
     flexDirection: 'row',
     borderWidth: 1,
-  }
+  },
 };
 
 export default BingoCard;
