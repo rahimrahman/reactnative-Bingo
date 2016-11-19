@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableWithoutFeedback, Modal } from 'react-native';
+import { View, Text, TouchableWithoutFeedback } from 'react-native';
+import { connect } from 'react-redux';
+import BackgroundTimer from 'react-native-background-timer';
 import { createBingoCard, bingoCellStatusInit, bingoCellValues, bingoCheck } from './BingoEngine';
 import { BingoCompleteModal } from './BingoCompleteModal';
+import { bingoStop } from '../actions';
 
 class BingoCard extends Component {
   constructor() {
@@ -16,14 +19,20 @@ class BingoCard extends Component {
   }
 
   onCellPress(rowNum, columnNum) {
-    this.cellStatus[rowNum][columnNum] = 1;
+    if (this.props.bingoBallsList.indexOf(this.bingoCellValues[rowNum][columnNum]) !== -1) {
+      this.cellStatus[rowNum][columnNum] = 1;
+
+      let rerender = 1;
+      if (this.state.rerender === 1) rerender = 0;
+      this.setState({ rerender });
+    }
+
     const isBingo = bingoCheck(this.bingoCellValues, this.cellStatus, rowNum, columnNum);
-
-    let rerender = 1;
-    if (this.state.rerender === 1) rerender = 0;
-    this.setState({ rerender });
-
-    if (isBingo) this.setState({ showBingo: true });
+    if (isBingo) {
+      this.setState({ showBingo: true });
+      this.props.bingoStop();
+      BackgroundTimer.clearInterval(this.props.bingoTimerIntervalId);
+    }
   }
 
   renderRow(rowNum, columnValue) {
@@ -51,7 +60,7 @@ class BingoCard extends Component {
       <TouchableWithoutFeedback
         key={cellValue}
         onPress={this.onCellPress.bind(this, rowNum, columnNum)}
-        >
+      >
         {this.renderCell(dynamic, cellValue)}
       </TouchableWithoutFeedback>
     );
@@ -110,4 +119,10 @@ const styles = {
   },
 };
 
-export default BingoCard;
+const mapStateToProps = (state) => {
+  const { bingoTimerIntervalId, bingoGameHasStarted, bingoBallsList } = state.Bingo;
+
+  return { bingoTimerIntervalId, bingoGameHasStarted, bingoBallsList };
+};
+
+export default connect(mapStateToProps, { bingoStop })(BingoCard);

@@ -55,6 +55,19 @@ const bingoCellValuesUS = () => {
   return cellValues;
 };
 
+const randomBingoBall = (bingoBalls) => randomBingoBallUS(bingoBalls);
+
+const randomBingoBallUS = (bingoBalls) => {
+  const ballCount = bingoBalls.length + 1;
+  let aRandomNumber = 0;
+  while (bingoBalls.length < ballCount) {
+    aRandomNumber = _.random(1, 75);
+    if (bingoBalls.indexOf(aRandomNumber) === -1) {
+      return aRandomNumber;
+    }
+  }
+};
+
 const bingoCheck = (cellValues, cellStatus, rowNum, columnNum) => {
   const rowCount = cellValues.length;
   // check horizontal
@@ -74,12 +87,11 @@ const bingoCheck = (cellValues, cellStatus, rowNum, columnNum) => {
   for (let row = 1; row < rowCount; row++) {
     if (cellStatus[row][columnUpDown] === 1) diagonalUpDownCounter++;
     if (cellStatus[rowCount - row][columnUpDown] === 1) diagonalDownUpCounter++;
-    console.log(rowCount - row, columnUpDown, diagonalDownUpCounter);
     columnUpDown++;
   }
-  if ((diagonalUpDownCounter === rowCount - 1) || 
-      (diagonalDownUpCounter === rowCount - 1)) 
-    return true;
+
+  if ((diagonalUpDownCounter === rowCount - 1) 
+    || (diagonalDownUpCounter === rowCount - 1)) return true;
 
   return false;
 };
@@ -103,5 +115,4 @@ const bingoCellStatusInit = () =>
     [0, 0, 0, 0, 0]
   ];
 
-export { createBingoCard, bingoCellValues, bingoCellStatusInit, bingoCheck };
-
+export { createBingoCard, bingoCellValues, bingoCellStatusInit, bingoCheck, randomBingoBall };
