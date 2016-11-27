@@ -4,7 +4,15 @@ import { connect } from 'react-redux';
 import BackgroundTimer from 'react-native-background-timer';
 import { Button } from './common';
 import BingoCard from './BingoCard';
-import { bingoStart, bingoStop, bingoAddToList, bingoUpdateTimerIntervalId } from '../actions';
+import { BingoCompleteModal } from './BingoCompleteModal';
+import {
+  bingoStart,
+  bingoStop,
+  bingoAddToList,
+  bingoUpdateTimerIntervalId,
+  bingoComplete,
+  bingoRestartButtonPressed,
+} from '../actions';
 
 class BingoMain extends Component {
   constructor() {
@@ -14,7 +22,7 @@ class BingoMain extends Component {
       timerIntervalId: null,
     };
   }
-  
+
   onStartButtonPress() {
     this.startBingo();
   }
@@ -28,9 +36,20 @@ class BingoMain extends Component {
     }
   }
 
+  /* temporary */
+  onXButtonPress() {
+    BackgroundTimer.clearInterval(this.props.bingoTimerIntervalId);
+    this.props.bingoStop();
+    this.props.bingoComplete();
+  }
+
+  onRestartPress() {
+    this.props.bingoRestartButtonPressed();
+  }
+
   startBingo() {
     const timerIntervalId = BackgroundTimer.setInterval(
-      () => { 
+      () => {
         this.props.bingoAddToList();
       },
       3000
@@ -38,7 +57,6 @@ class BingoMain extends Component {
 
     this.props.bingoStart();
     this.props.bingoUpdateTimerIntervalId(timerIntervalId);
-    // this.setState({ timerIntervalId });
   }
 
   renderBingoBallsList() {
@@ -55,10 +73,15 @@ class BingoMain extends Component {
             <Button onPress={this.onStartStopButtonPress.bind(this)} style={{ flex: 1 }}>
               {button}
             </Button>
+            { /*
+            <Button onPress={this.onXButtonPress.bind(this)} style={{ flex: 1 }}>
+              X
+            </Button>
+            */ }
           </View>
         </View>
       );
-    } 
+    }
     return (
       <View style={{ flex: 2 }}>
         <View style={{ flex: 1 }} />
@@ -82,6 +105,10 @@ class BingoMain extends Component {
         {this.renderBingoBallsList()}
         <BingoCard />
         <View style={footerContainer} />
+        <BingoCompleteModal
+          visible={this.props.bingoGameHasCompleted}
+          onPress={this.onRestartPress.bind(this)}
+        />
       </View>
     );
   }
@@ -101,14 +128,25 @@ const styles = {
 };
 
 const mapStateToProps = (state) => {
-  const { bingoTimerIntervalId, bingoGameHasStarted, bingoBallsList } = state.Bingo;
+  const {
+    bingoTimerIntervalId,
+    bingoGameHasStarted,
+    bingoGameHasCompleted,
+    bingoBallsList
+  } = state.Bingo;
 
-  return { bingoTimerIntervalId, bingoGameHasStarted, bingoBallsList };
+  return {
+    bingoTimerIntervalId,
+    bingoGameHasStarted,
+    bingoGameHasCompleted,
+    bingoBallsList };
 };
 
 export default connect(mapStateToProps, {
   bingoStart,
   bingoStop,
   bingoAddToList,
-  bingoUpdateTimerIntervalId
+  bingoUpdateTimerIntervalId,
+  bingoComplete,
+  bingoRestartButtonPressed,
 })(BingoMain);

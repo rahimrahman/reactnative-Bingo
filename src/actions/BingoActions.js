@@ -5,6 +5,9 @@ import {
   BINGO_STOP,
   BINGO_UPDATE_TIMER_INTERVAL_ID,
   BINGO_ADD_TO_LIST,
+  BINGO_COMPLETE,
+  BINGO_RESTART,
+  BINGO_RESTART_INITIATED,
 } from './types';
 
 export const bingoStart = () => {
@@ -34,5 +37,23 @@ export const bingoAddToList = () => {
       type: BINGO_ADD_TO_LIST,
       payload: randomNumber
     });
+  };
+};
+
+export const bingoComplete = () => {
+    return {
+      type: BINGO_COMPLETE,
+    };
+};
+
+export const bingoRestartButtonPressed = () => {
+  return {
+    type: BINGO_RESTART_INITIATED,
+  };
+};
+
+export const bingoRestart = () => {
+  return {
+    type: BINGO_RESTART,
   };
 };

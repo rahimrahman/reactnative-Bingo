@@ -1,18 +1,20 @@
 import React from 'react';
 import { View, Text, Modal } from 'react-native';
-import { CardSection } from './common';
+import { CardSection, Button } from './common';
 
-export const BingoCompleteModal = ({ visible }) => {
+export const BingoCompleteModal = ({ visible, onPress }) => {
   return (
     <Modal
       animationType={'slide'}
       transparent
       visible={visible}
-      onRequestClose={() => { console.log('Modal has been closed.'); } }
+      onRequestClose={() => { console.log('Modal has been closed.'); }}
     >
       <View style={styles.modalContainer}>
         <CardSection style={styles.cardSection}>
-          <Text style={styles.bingoText}>BINGO</Text>
+          <View><Text style={styles.bingoText}>BINGO</Text></View>
+          <View />
+          <View><Button onPress={onPress}>Restart</Button></View>
         </CardSection>
       </View>
     </Modal>
@@ -28,6 +30,7 @@ const styles = {
   },
   cardSection: {
     justifyContent: 'center',
+    flexDirection: 'column'
   },
   bingoText: {
     flex: 1,
